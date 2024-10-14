@@ -23,7 +23,9 @@ func main() {
 	storage := setupDatabase(configuration)
 
 	locator = implementations.Locator{
-		WalletService:  &implementations.WalletService{},
+		WalletService: &implementations.WalletService{
+			Storage: storage,
+		},
 		EncoderService: &implementations.EncoderService{},
 		RpcService:     &implementations.RpcService{},
 		Storage:        storage,
@@ -47,15 +49,11 @@ func main() {
 	deployCommand := commands.DeployCommand{
 		Locator: locator,
 	}
-	migrateCommand := commands.MigrateCommand{
-		Locator: locator,
-	}
 
 	rootCmd.AddCommand(all.Executable())
 	rootCmd.AddCommand(configCommand.Executable())
 	rootCmd.AddCommand(getCommand.Executable())
 	rootCmd.AddCommand(deployCommand.Executable())
-	rootCmd.AddCommand(migrateCommand.Executable())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
