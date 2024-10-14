@@ -16,3 +16,8 @@ CREATE TABLE IF NOT EXISTS wallets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     wallet_key TEXT
 );
+
+CREATE TABLE IF NOT EXISTS networks (
+    rpc TEXT,
+    network_id INTEGER
+)
