@@ -1,12 +1,15 @@
 package implementations
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"Slurpy/interfaces"
@@ -117,10 +120,44 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 	return data, nil
 }
 
-func (d *DeploymentService) Deploy(key *string, auth *bind.TransactOpts, abi *abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) error {
+func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, auth *bind.TransactOpts, client *ethclient.Client) error {
+	addresses := make(map[interface{}]interface{})
+
+	for contractName, config := range schema.Contracts {
+		abiData, err := json.Marshal(config.Abi)
+		if err != nil {
+			log.Fatalf("Failed to marshal ABI: %v", err)
+		}
+
+		contractAbi, err := abi.JSON(bytes.NewReader(abiData))
+		if err != nil {
+			log.Fatalf("Failed to parse ABI for contract %s: %v", contractName, err)
+			return err
+		}
+
+		bytecode := common.FromHex(config.Bytecode)
+
+		params := make([]interface{}, len(config.Dependencies))
+		for i, dep := range config.Dependencies {
+			params[i] = addresses[dep]
+		}
+
+		address, err := d.deploy(key, auth, &contractAbi, &bytecode, client, &params)
+		if err != nil {
+			return err
+		}
+
+		addresses[contractName] = address.Hex()
+	}
+
+	return nil
+}
+
+func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi *abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, error) {
 	address, tx, _, err := bind.DeployContract(auth, *abi, *bytecode, client, *params...)
 	if err != nil {
 		log.Fatalf("Failed to deploy contract: %v", err)
+		return common.Address{}, err
 	}
 
 	fmt.Printf("Contract deployed at address: %s\n", address.Hex())
@@ -130,19 +167,20 @@ func (d *DeploymentService) Deploy(key *string, auth *bind.TransactOpts, abi *ab
 	defer d.Storage.Close()
 
 	insertDeploymentSQL := `
-		INSERT INTO deployments (contract, created_at, group)
-		VALUES ($1, datetime('now', 'localtime'), '')
+		INSERT INTO deployments (contract, created_at, group_name)
+		VALUES ($1, datetime('now', 'localtime'), '$1)
 		RETURNING id
 	`
 	row := d.Storage.QuerySingle(&insertDeploymentSQL, &[]interface{}{
 		address.Hex(),
+		&key,
 	})
 
 	var id int
 	err = row.Scan(&id)
 	if err != nil {
 		log.Fatalf("Failed to save deployment details: %v", err)
-		return err
+		return common.Address{}, err
 	}
 
 	insertParamsSQL := `
@@ -154,12 +192,11 @@ func (d *DeploymentService) Deploy(key *string, auth *bind.TransactOpts, abi *ab
 			&param,
 			&id,
 		})
-
 		if err != nil {
 			log.Fatalf("Failed to insert deployment parameters: %v", err)
-			return err
+			return common.Address{}, err
 		}
 	}
 
-	return nil
+	return address, nil
 }
