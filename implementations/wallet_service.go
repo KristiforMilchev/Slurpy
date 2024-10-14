@@ -2,42 +2,91 @@ package implementations
 
 import (
 	"crypto/ecdsa"
-	"errors"
+	"fmt"
 	"log"
 
 	"github.com/ethereum/go-ethereum/crypto"
+
+	"Slurpy/interfaces"
 )
 
 type WalletService struct {
-	wallets []ecdsa.PrivateKey
-}
-
-func (w *WalletService) Init(keys *[]string) error {
-	for _, key := range *keys {
-		privateKey, err := crypto.HexToECDSA(key)
-		if err != nil {
-			log.Fatalf("Failed to load private key: %v", err)
-			return err
-		}
-
-		w.wallets = append(w.wallets, *privateKey)
-	}
-	return nil
+	Storage interfaces.Storage
 }
 
 func (w *WalletService) First() (*ecdsa.PrivateKey, error) {
-	if len(w.wallets) == 0 {
-		return nil, errors.New("collection is empty")
+	sql := `
+		SELECT wallet_key FROM wallets
+		WHERE id = $1
+	`
+	w.Storage.Open()
+	defer w.Storage.Close()
+
+	row := w.Storage.QuerySingle(&sql, &[]interface{}{
+		0,
+	})
+
+	var wallet string
+	err := row.Scan(&wallet)
+	if err != nil {
+		return nil, err
 	}
 
-	return &w.wallets[0], nil
+	privateKey, err := crypto.HexToECDSA(wallet)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return privateKey, nil
 }
 
 func (w *WalletService) WalletAt(index int) (*ecdsa.PrivateKey, error) {
-	if len(w.wallets) < index {
-		return nil, errors.New("collection is empty")
+	sql := `
+		SELECT wallet_key FROM wallets
+		WHERE id = $1
+	`
+	w.Storage.Open()
+	defer w.Storage.Close()
 
+	row := w.Storage.QuerySingle(&sql, &[]interface{}{
+		index,
+	})
+
+	var wallet string
+	err := row.Scan(&wallet)
+	if err != nil {
+		return nil, err
 	}
 
-	return &w.wallets[index], nil
+	privateKey, err := crypto.HexToECDSA(wallet)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return privateKey, nil
+}
+
+func (w *WalletService) AddWallet(key *string) error {
+	sql := `
+		INSERT INTO wallets (wallet_key)
+		VALUES ($1)
+		RETURNING id
+	`
+	w.Storage.Open()
+	defer w.Storage.Close()
+
+	row := w.Storage.QuerySingle(&sql, &[]interface{}{
+		&key,
+	})
+
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		log.Fatalf("Failed to save deployment details: %v", err)
+		return err
+	}
+
+	return nil
 }
