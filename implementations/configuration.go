@@ -8,12 +8,13 @@ import (
 
 type Configuration struct {
 	values map[string]interface{}
+	File   *string
 }
 
 func (config *Configuration) Load() bool {
 	config.values = make(map[string]interface{})
 
-	file, err := os.Open("settings.json")
+	file, err := os.Open(*config.File)
 	if err != nil {
 		panic("Configuration file doesn't exist.")
 	}
@@ -21,7 +22,7 @@ func (config *Configuration) Load() bool {
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&config.values); err != nil {
 		fmt.Println("Error decoding JSON:", err)
-
+		panic("Malformed Configuration file!")
 	}
 
 	defer file.Close()
