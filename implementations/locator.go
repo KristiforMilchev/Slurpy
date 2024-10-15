@@ -8,4 +8,5 @@ type Locator struct {
 	RpcService        interfaces.RpcService
 	Storage           interfaces.Storage
 	WalletService     interfaces.WalletService
+	NetworkService    interfaces.NetworkService
 }
