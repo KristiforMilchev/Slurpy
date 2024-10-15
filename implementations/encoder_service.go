@@ -3,7 +3,10 @@ package implementations
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
@@ -12,6 +15,9 @@ type EncoderService struct {
 }
 
 func (e *EncoderService) ParseAbi(abiData *[]byte) (*abi.ABI, error) {
+	if abiData == nil || len(*abiData) == 0 {
+		return nil, errors.New("nil encoded data is not allowed")
+	}
 	byteReader := bytes.NewReader(*abiData)
 	parsedABI, err := abi.JSON(byteReader)
 	if err != nil {
@@ -23,9 +29,14 @@ func (e *EncoderService) ParseAbi(abiData *[]byte) (*abi.ABI, error) {
 }
 
 func (e *EncoderService) ParseByteCode(bytecodeHex *string) ([]byte, error) {
-	bytecode, err := hex.DecodeString(string(*bytecodeHex))
+	if *bytecodeHex == "" {
+		return nil, errors.New("empty Strings are not allowed")
+	}
+
+	cleanedHex := strings.TrimPrefix(*bytecodeHex, "0x")
+	bytecode, err := hex.DecodeString(string(cleanedHex))
 	if err != nil {
-		log.Fatalf("Failed to decode bytecode: %v", err)
+		fmt.Printf("Failed to decode bytecode: %v", err)
 		return nil, err
 	}
 
