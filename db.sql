@@ -14,10 +14,14 @@ CREATE TABLE IF NOT EXISTS deployment_parameters (
 
 CREATE TABLE IF NOT EXISTS wallets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    wallet_key TEXT
+    wallet_key TEXT,
+    network TEXT,
+    FOREIGN KEY (network) REFERENCES networks(network_id) ON DELETE CASCADE
+
 );
 
 CREATE TABLE IF NOT EXISTS networks (
+    network_name TEXT PRIMARY KEY
     rpc TEXT,
-    network_id INTEGER
+    network_id INTEGER,
 )
