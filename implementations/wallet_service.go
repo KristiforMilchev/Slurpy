@@ -68,10 +68,10 @@ func (w *WalletService) WalletAt(index int) (*ecdsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
-func (w *WalletService) AddWallet(key *string) error {
+func (w *WalletService) AddWallet(key *string, network *string) error {
 	sql := `
-		INSERT INTO wallets (wallet_key)
-		VALUES ($1)
+		INSERT INTO wallets (wallet_key, network)
+		VALUES ($1, $2)
 		RETURNING id
 	`
 	w.Storage.Open()
@@ -79,6 +79,7 @@ func (w *WalletService) AddWallet(key *string) error {
 
 	row := w.Storage.QuerySingle(&sql, &[]interface{}{
 		&key,
+		&network,
 	})
 
 	var id int

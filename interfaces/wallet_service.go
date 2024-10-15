@@ -5,5 +5,5 @@ import "crypto/ecdsa"
 type WalletService interface {
 	First() (*ecdsa.PrivateKey, error)
 	WalletAt(index int) (*ecdsa.PrivateKey, error)
-	AddWallet(key *string) error
+	AddWallet(key *string, network *string) error
 }
