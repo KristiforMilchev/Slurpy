@@ -48,6 +48,7 @@ func (d *DeployCommand) Execute(path *string, key *string, network *string) {
 	}
 	wallet, err := d.Locator.WalletService.WalletAt(0)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal("Failed to retrive wallet")
 	}
 	rpc := d.Locator.RpcService.GetClient()
