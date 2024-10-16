@@ -14,15 +14,18 @@ type WalletService struct {
 	Storage interfaces.Storage
 }
 
-func (w *WalletService) First() (*ecdsa.PrivateKey, error) {
+func (w *WalletService) First(network *string) (*ecdsa.PrivateKey, error) {
 	sql := `
 		SELECT wallet_key FROM wallets
-		WHERE id = $1
+		WHERE network = $1
+		ORDER BY id
+		LIMIT 1 OFFSET $2;
 	`
 	w.Storage.Open()
 	defer w.Storage.Close()
 
 	row := w.Storage.QuerySingle(&sql, &[]interface{}{
+		&network,
 		0,
 	})
 
@@ -41,16 +44,19 @@ func (w *WalletService) First() (*ecdsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
-func (w *WalletService) WalletAt(index int) (*ecdsa.PrivateKey, error) {
+func (w *WalletService) WalletAt(index int, network *string) (*ecdsa.PrivateKey, error) {
 	sql := `
 		SELECT wallet_key FROM wallets
-		WHERE id = $1
+		WHERE network = $1
+		ORDER BY id
+		LIMIT 1 OFFSET $2;
 	`
 	w.Storage.Open()
 	defer w.Storage.Close()
 
 	row := w.Storage.QuerySingle(&sql, &[]interface{}{
-		index,
+		&network,
+		&index,
 	})
 
 	var wallet string
