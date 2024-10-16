@@ -46,11 +46,17 @@ func (d *DeployCommand) Execute(path *string, key *string, network *string) {
 	if err != nil {
 		log.Fatal("Failed to parse deployment file, please check for syntax errors!")
 	}
-	wallet, err := d.Locator.WalletService.WalletAt(0)
+	wallet, err := d.Locator.WalletService.WalletAt(0, network)
 	if err != nil {
 		fmt.Println(err)
 		log.Fatal("Failed to retrive wallet")
 	}
+
+	networkData, err := d.Locator.NetworkService.Get(network)
+	if err != nil {
+		log.Fatal("Failed to retrive netowrk by name")
+	}
+	d.Locator.RpcService.SetClient(&networkData.Rpc)
 	rpc := d.Locator.RpcService.GetClient()
 	chainid, err := rpc.ChainID(context.Background())
 	if err != nil {
