@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"Slurpy/interfaces"
+	"Slurpy/models"
 )
 
 type WalletService struct {
@@ -96,4 +97,49 @@ func (w *WalletService) AddWallet(key *string, network *string) error {
 	}
 
 	return nil
+}
+
+func (w *WalletService) DeleteWallet(id *int) error {
+	sql := `
+		DELETE FROM wallets
+		WHERE id = $1
+	`
+
+	w.Storage.Open()
+	defer w.Storage.Close()
+
+	return w.Storage.Exec(&sql, &[]interface{}{
+		&id,
+	})
+}
+
+func (w *WalletService) GetWalletsForNetwork(network *string) ([]models.Wallet, error) {
+	sql := `
+		SELECT * FROM wallets
+		WHERE network = $1
+	`
+
+	w.Storage.Open()
+	defer w.Storage.Close()
+
+	rows, err := w.Storage.Query(&sql, &[]interface{}{
+		&network,
+	})
+
+	if err != nil {
+		return []models.Wallet{}, err
+	}
+
+	var wallets []models.Wallet
+
+	for rows.Next() {
+		var wallet models.Wallet
+		err := rows.Scan(&wallet.Id, &wallet.Key, &wallet.Network)
+		if err != nil {
+			return []models.Wallet{}, err
+		}
+		wallets = append(wallets, wallet)
+	}
+
+	return wallets, nil
 }
