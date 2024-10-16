@@ -12,7 +12,8 @@ type NetworkService struct {
 }
 
 func (n *NetworkService) Add(rpc *string, port *int, name *string) error {
-
+	n.Storage.Open()
+	defer n.Storage.Close()
 	sql := `
 		INSERT INTO networks
 		(rpc, network_id, network_name)
@@ -38,6 +39,8 @@ func (n *NetworkService) Add(rpc *string, port *int, name *string) error {
 }
 
 func (n *NetworkService) Get(name *string) (models.Network, error) {
+	n.Storage.Open()
+	defer n.Storage.Close()
 	sql := `
 		SELECT * FROM networks
 		WHERE network_name = $1
@@ -58,6 +61,8 @@ func (n *NetworkService) Get(name *string) (models.Network, error) {
 }
 
 func (n *NetworkService) Remove(name *string) error {
+	n.Storage.Open()
+	defer n.Storage.Close()
 	sql := `
 		DELETE FROM networks
 		WHERE network_name = $1
