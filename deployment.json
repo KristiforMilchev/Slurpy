@@ -73,7 +73,7 @@
                 }
             ],
             "dependencies": [
-                "contract1"
+                "$contract1"
             ]
         }
     }
