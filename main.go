@@ -32,9 +32,6 @@ func main() {
 		Locator: locator,
 	}
 
-	configCommand := commands.ConfigCommand{
-		Locator: locator,
-	}
 	getCommand := commands.GetCommand{
 		Locator: locator,
 	}
@@ -48,12 +45,20 @@ func main() {
 		Locator: locator,
 	}
 
+	getNetworkWallets := wallet.GetAllWalletsCommand{
+		Locator: locator,
+	}
+	deleteWallet := wallet.DeleteWalletCommand{
+		Locator: locator,
+	}
+
 	rootCmd.AddCommand(all.Executable())
-	rootCmd.AddCommand(configCommand.Executable())
 	rootCmd.AddCommand(getCommand.Executable())
 	rootCmd.AddCommand(deployCommand.Executable())
 	rootCmd.AddCommand(addWalletCommand.Executable())
 	rootCmd.AddCommand(addNetworkCommand.Executable())
+	rootCmd.AddCommand(getNetworkWallets.Executable())
+	rootCmd.AddCommand(deleteWallet.Executable())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
