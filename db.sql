@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS wallets (
 );
 
 CREATE TABLE IF NOT EXISTS networks (
-    network_name TEXT PRIMARY KEY
+    network_name TEXT PRIMARY KEY,
     rpc TEXT,
-    network_id INTEGER,
+    network_id INTEGER
 )
