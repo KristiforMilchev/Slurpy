@@ -16,7 +16,7 @@ type AddWallet struct {
 func (a *AddWallet) Executable() *cobra.Command {
 	return &cobra.Command{
 		Use:   "add-wallet [private key] [network]",
-		Short: "Deploy a smart contract migration",
+		Short: "Adds a wallet for a given network",
 		Args:  cobra.MaximumNArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			path := args[0]
