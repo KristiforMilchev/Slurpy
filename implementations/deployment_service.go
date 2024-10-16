@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -119,9 +121,9 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 
 	return data, nil
 }
-
 func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, auth *bind.TransactOpts, client *ethclient.Client) error {
-	addresses := make(map[interface{}]interface{})
+	// Store contract addresses by name; interface{} allows different types
+	addresses := make(map[string]interface{})
 
 	for contractName, config := range schema.Contracts {
 		abiData, err := json.Marshal(config.Abi)
@@ -137,24 +139,50 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 
 		bytecode := common.FromHex(config.Bytecode)
 
+		// Prepare constructor parameters by replacing named dependencies
 		params := make([]interface{}, len(config.Dependencies))
 		for i, dep := range config.Dependencies {
-			params[i] = addresses[dep]
+			switch dep := dep.(type) {
+			case string:
+				// Handle named contract dependencies (e.g., "$contract1")
+				if strings.HasPrefix(dep, "$") {
+					contractDep := dep[1:] // Remove the '$' prefix to get the contract name
+					address, exists := addresses[contractDep]
+					if !exists {
+						log.Fatalf("Failed to find dependency %s for contract %s", contractDep, contractName)
+						return fmt.Errorf("dependency %s not found", contractDep)
+					}
+					params[i] = address // Replace with the contract address
+				} else {
+					// Regular string parameters
+					params[i] = dep
+				}
+			default:
+				// Handle any other type directly
+				params[i] = dep
+			}
 		}
 
+		// Deploy the contract
 		address, err := d.deploy(key, auth, &contractAbi, &bytecode, client, &params)
 		if err != nil {
 			return err
 		}
 
-		addresses[contractName] = address.Hex()
+		// Store the deployed contract address
+		addresses[contractName] = common.HexToAddress(address.Hex())
 	}
 
 	return nil
 }
 
 func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi *abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, error) {
-	address, tx, _, err := bind.DeployContract(auth, *abi, *bytecode, client, *params...)
+	convertedParams := make([]interface{}, len(*params))
+	for i, param := range *params {
+		convertedParams[i] = resolveParameterType(param)
+	}
+
+	address, tx, _, err := bind.DeployContract(auth, *abi, *bytecode, client, convertedParams...)
 	if err != nil {
 		log.Fatalf("Failed to deploy contract: %v", err)
 		return common.Address{}, err
@@ -168,7 +196,7 @@ func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi *ab
 
 	insertDeploymentSQL := `
 		INSERT INTO deployments (contract, created_at, group_name)
-		VALUES ($1, datetime('now', 'localtime'), '$1)
+		VALUES ($1, datetime('now', 'localtime'), $2)
 		RETURNING id
 	`
 	row := d.Storage.QuerySingle(&insertDeploymentSQL, &[]interface{}{
@@ -199,4 +227,23 @@ func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi *ab
 	}
 
 	return address, nil
+}
+
+func resolveParameterType(param interface{}) interface{} {
+	switch v := param.(type) {
+	case float64:
+		return big.NewInt(int64(v))
+	case int:
+		return big.NewInt(int64(v))
+	case string:
+		return v
+	case bool:
+		return v
+	case common.Address:
+		return v
+	case *big.Int:
+		return v
+	default:
+		return v
+	}
 }
