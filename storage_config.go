@@ -13,8 +13,9 @@ func SetupDatabase(config interfaces.Configuration) interfaces.Storage {
 
 	dbPath := config.GetKey("DbPath").(string)
 	dbName := config.GetKey("DbName").(string)
-
-	tablesData, err := os.ReadFile("./db.sql")
+	dbFile := "./db.sql"
+	dbData := FileFromExecutable(&dbFile)
+	tablesData, err := os.ReadFile(*dbData)
 
 	if err != nil {
 		log.Fatal("Couldn't find database file, aborting!")
