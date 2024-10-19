@@ -1,4 +1,4 @@
-package commands
+package deployments
 
 import (
 	"fmt"
@@ -9,26 +9,29 @@ import (
 	"slurpy/implementations"
 )
 
-type GetCommand struct {
+type GetDeploymentCommand struct {
 	Locator implementations.Locator
 }
 
-func (g *GetCommand) Executable() *cobra.Command {
+func (g *GetDeploymentCommand) Executable() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get [parameter id]",
+		Use:   "deployment [id]",
 		Short: "Get a deployment parameter by ID",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) == 0 {
+				log.Fatal("deployment key is required")
+			}
+
 			id := args[0]
 			g.Execute(&id)
 		},
 	}
 }
 
-func (g *GetCommand) Execute(id *string) {
+func (g *GetDeploymentCommand) Execute(id *string) {
 	deployment, err := g.Locator.DeploymentService.GetDeploymentByKey(*id)
 	if err != nil {
-		fmt.Println(err)
 		log.Fatal("Failed to retrive deployment by id")
 	}
 

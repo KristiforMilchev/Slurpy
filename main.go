@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"slurpy/commands"
+	"slurpy/commands/deployments"
 	"slurpy/commands/network"
 	"slurpy/commands/wallet"
 	"slurpy/implementations"
@@ -28,14 +28,13 @@ func main() {
 
 	var rootCmd = &cobra.Command{Use: "slurpy"}
 
-	all := commands.AllCommand{
+	getAllDeployments := deployments.AllDeploymentsCommand{
 		Locator: locator,
 	}
-
-	getCommand := commands.GetCommand{
+	getDeploymentCommand := deployments.GetDeploymentCommand{
 		Locator: locator,
 	}
-	deployCommand := commands.DeployCommand{
+	deployCommand := deployments.DeployCommand{
 		Locator: locator,
 	}
 	addWalletCommand := wallet.AddWallet{
@@ -54,8 +53,8 @@ func main() {
 		Locator: locator,
 	}
 
-	rootCmd.AddCommand(all.Executable())
-	rootCmd.AddCommand(getCommand.Executable())
+	rootCmd.AddCommand(getAllDeployments.Executable())
+	rootCmd.AddCommand(getDeploymentCommand.Executable())
 	rootCmd.AddCommand(deployCommand.Executable())
 	rootCmd.AddCommand(addWalletCommand.Executable())
 	rootCmd.AddCommand(getNetworksCommand.Executable())

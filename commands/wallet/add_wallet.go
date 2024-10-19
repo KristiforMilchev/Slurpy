@@ -1,7 +1,6 @@
 package wallet
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -19,6 +18,10 @@ func (a *AddWallet) Executable() *cobra.Command {
 		Short: "Adds a wallet for a given network",
 		Args:  cobra.MaximumNArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 2 {
+				log.Fatal("Missing arguments, please add a private key and a network")
+			}
+
 			path := args[0]
 			network := args[1]
 
@@ -34,13 +37,12 @@ func (a *AddWallet) Execute(privateKey *string, network *string) {
 	_, err := a.Locator.NetworkService.Get(network)
 
 	if err != nil {
-		log.Fatal("Failed to find network with name", network)
+		log.Fatalf("Failed to find network with name %v", network)
 		return
 	}
 
 	err = a.Locator.WalletService.AddWallet(privateKey, network)
 	if err != nil {
-		fmt.Println(err)
-		log.Fatal("Failed to add wallet to database, aborting!")
+		log.Fatal("Failed to save add wallet!")
 	}
 }

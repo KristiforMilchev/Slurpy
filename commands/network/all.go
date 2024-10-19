@@ -30,7 +30,7 @@ func (g *GetAllNetworksCommand) Execute() {
 	networks, err := g.Locator.NetworkService.All()
 
 	if err != nil {
-		log.Fatal("Failed to fetch networks from the database", err)
+		log.Fatal("Failed to fetch networks from the database")
 	}
 
 	t := table.NewWriter()

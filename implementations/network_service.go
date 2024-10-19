@@ -58,12 +58,7 @@ func (n *NetworkService) Add(rpc *string, port *int, name *string) error {
 	var result int
 	err := row.Scan(&result)
 
-	if err != nil {
-		fmt.Println("Failed to save query to database")
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (n *NetworkService) Get(name *string) (models.Network, error) {
@@ -81,7 +76,6 @@ func (n *NetworkService) Get(name *string) (models.Network, error) {
 	var network models.Network
 	err := row.Scan(&network.Name, &network.Rpc, &network.NetworkId)
 	if err != nil {
-		fmt.Println("Failed to retrive network from database with name ", *name)
 		return models.Network{}, err
 	}
 

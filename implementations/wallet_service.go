@@ -3,7 +3,6 @@ package implementations
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"log"
 
 	"github.com/ethereum/go-ethereum/crypto"
 
@@ -91,12 +90,8 @@ func (w *WalletService) AddWallet(key *string, network *string) error {
 
 	var id int
 	err := row.Scan(&id)
-	if err != nil {
-		log.Fatalf("Failed to save deployment details: %v", err)
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (w *WalletService) DeleteWallet(id *int) error {

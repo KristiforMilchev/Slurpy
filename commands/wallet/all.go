@@ -21,6 +21,9 @@ func (g *GetAllWalletsCommand) Executable() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "List all wallets in a network",
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) == 0 {
+				log.Fatal("Network parameter is required")
+			}
 			network := args[0]
 			g.Execute(&network)
 		},

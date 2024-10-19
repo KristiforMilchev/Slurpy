@@ -1,4 +1,4 @@
-package commands
+package deployments
 
 import (
 	"context"
@@ -24,6 +24,9 @@ func (d *DeployCommand) Executable() *cobra.Command {
 		Short: "Deploy a smart contract migration",
 		Args:  cobra.MaximumNArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 3 {
+				log.Fatalf("Parameters are required, expected 3 got %v", len(args))
+			}
 			path := args[0]
 			network := args[1]
 			key := ""
@@ -48,7 +51,6 @@ func (d *DeployCommand) Execute(path *string, key *string, network *string) {
 	}
 	wallet, err := d.Locator.WalletService.WalletAt(0, network)
 	if err != nil {
-		fmt.Println(err)
 		log.Fatal("Failed to retrive wallet")
 	}
 
@@ -70,7 +72,6 @@ func (d *DeployCommand) Execute(path *string, key *string, network *string) {
 	err = d.Locator.DeploymentService.DeployContracts(schema, key, auth, rpc)
 	if err != nil {
 		log.Fatal("Failed to deploy migration!")
-		log.Fatal(err)
 	}
 
 	fmt.Println("Deployment migrated")

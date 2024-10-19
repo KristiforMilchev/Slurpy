@@ -20,6 +20,10 @@ func (a *AddNetwork) Executable() *cobra.Command {
 		Short: "Adds a network to the database",
 		Args:  cobra.MaximumNArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 3 {
+				log.Fatal("Missing parameter, please add the required parameters")
+			}
+
 			rpc := args[0]
 			networkId, err := strconv.Atoi(args[1])
 			if err != nil {
@@ -38,14 +42,12 @@ func (a *AddNetwork) Execute(rpc *string, networkId *int, networkName *string) {
 
 	_, err := a.Locator.NetworkService.Get(networkName)
 	if err == nil {
-		fmt.Println(err)
-		log.Fatal("Newtork already exists with the same name!", err)
+		log.Fatal("Newtork already exists with the same name!")
 	}
 
 	err = a.Locator.NetworkService.Add(rpc, networkId, networkName)
 
 	if err != nil {
-		fmt.Println(err)
-		log.Fatal("Failed to save network to the database, please check the stack!")
+		log.Fatal("Failed to save network to the database!")
 	}
 }

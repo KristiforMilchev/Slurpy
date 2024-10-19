@@ -22,7 +22,9 @@ func (d *DeleteWalletCommand) Executable() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 
 		Run: func(cmd *cobra.Command, args []string) {
-
+			if len(args) == 0 {
+				log.Fatal("id is required")
+			}
 			id, err := strconv.Atoi(args[0])
 			if err != nil {
 				log.Fatal("Bad command argument, expected int received", args[0])
