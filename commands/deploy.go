@@ -10,8 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/spf13/cobra"
 
-	"Slurpy/implementations"
-	"Slurpy/models"
+	"slurpy/implementations"
+	"slurpy/models"
 )
 
 type DeployCommand struct {

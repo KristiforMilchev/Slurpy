@@ -1,6 +1,6 @@
 package implementations
 
-import "Slurpy/interfaces"
+import "slurpy/interfaces"
 
 type Locator struct {
 	DeploymentService interfaces.DeploymentService

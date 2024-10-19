@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"Slurpy/implementations"
+	"slurpy/implementations"
 )
 
 type MigrateCommand struct {

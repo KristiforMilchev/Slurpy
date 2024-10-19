@@ -1,4 +1,4 @@
-module Slurpy
+module slurpy
 
 go 1.22.1
 

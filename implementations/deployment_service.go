@@ -14,8 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"Slurpy/interfaces"
-	"Slurpy/models"
+	"slurpy/interfaces"
+	"slurpy/models"
 )
 
 type DeploymentService struct {

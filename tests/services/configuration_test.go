@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"Slurpy/implementations"
-	"Slurpy/interfaces"
+	"slurpy/implementations"
+	"slurpy/interfaces"
 )
 
 var config interfaces.Configuration

@@ -3,7 +3,7 @@ package interfaces
 import (
 	"crypto/ecdsa"
 
-	"Slurpy/models"
+	"slurpy/models"
 )
 
 type WalletService interface {

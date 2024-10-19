@@ -7,8 +7,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"Slurpy/interfaces"
-	"Slurpy/models"
+	"slurpy/interfaces"
+	"slurpy/models"
 )
 
 type WalletService struct {

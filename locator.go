@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Slurpy/implementations"
-	"Slurpy/interfaces"
+	"slurpy/implementations"
+	"slurpy/interfaces"
 )
 
 func Locator(storage interfaces.Storage) implementations.Locator {

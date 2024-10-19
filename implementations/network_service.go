@@ -3,8 +3,8 @@ package implementations
 import (
 	"fmt"
 
-	"Slurpy/interfaces"
-	"Slurpy/models"
+	"slurpy/interfaces"
+	"slurpy/models"
 )
 
 type NetworkService struct {

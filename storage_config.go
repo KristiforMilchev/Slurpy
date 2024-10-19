@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"Slurpy/implementations"
-	"Slurpy/interfaces"
+	"slurpy/implementations"
+	"slurpy/interfaces"
 )
 
 func SetupDatabase(config interfaces.Configuration) interfaces.Storage {

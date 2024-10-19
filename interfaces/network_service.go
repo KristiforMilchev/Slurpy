@@ -1,6 +1,6 @@
 package interfaces
 
-import "Slurpy/models"
+import "slurpy/models"
 
 type NetworkService interface {
 	Add(rpc *string, port *int, name *string) error

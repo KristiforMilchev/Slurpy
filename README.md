@@ -1,11 +1,11 @@
-# Slurpy
+# slurpy
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
 
 Early build 0.1.5 is available, it has limited functionality however it covers the core use case available in the description bellow, do not use for the mainnet and only store disposable wallets that don't have any real currency in them!
 
 
-Slurpy is an open-source tool written in Go for quickly deploying smart contracts based on bytecode and ABI. It streamlines the deployment process, when copying existing network infrastructure from one chain to another.
+slurpy is an open-source tool written in Go for quickly deploying smart contracts based on bytecode and ABI. It streamlines the deployment process, when copying existing network infrastructure from one chain to another.
 
 ## Description
 
@@ -27,7 +27,7 @@ With this tool i solved my issue and hopefully did that for least one more perso
 
 ## Installation
 
-To install Slurpy, clone the repository and build the project:
+To install slurpy, clone the repository and build the project:
 
 ```bash
 git clone https://github.com/KristiforMilchev/slurpy.git

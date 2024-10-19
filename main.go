@@ -6,11 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"Slurpy/commands"
-	"Slurpy/commands/network"
-	"Slurpy/commands/wallet"
-	"Slurpy/implementations"
-	"Slurpy/interfaces"
+	"slurpy/commands"
+	"slurpy/commands/network"
+	"slurpy/commands/wallet"
+	"slurpy/implementations"
+	"slurpy/interfaces"
 )
 
 var locator implementations.Locator

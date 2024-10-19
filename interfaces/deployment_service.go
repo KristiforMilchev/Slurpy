@@ -4,7 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"Slurpy/models"
+	"slurpy/models"
 )
 
 type DeploymentService interface {
