@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -45,7 +44,9 @@ func main() {
 	addNetworkCommand := network.AddNetwork{
 		Locator: locator,
 	}
-
+	getNetworksCommand := network.GetAllNetworksCommand{
+		Locator: locator,
+	}
 	getNetworkWallets := wallet.GetAllWalletsCommand{
 		Locator: locator,
 	}
@@ -57,12 +58,13 @@ func main() {
 	rootCmd.AddCommand(getCommand.Executable())
 	rootCmd.AddCommand(deployCommand.Executable())
 	rootCmd.AddCommand(addWalletCommand.Executable())
+	rootCmd.AddCommand(getNetworksCommand.Executable())
 	rootCmd.AddCommand(addNetworkCommand.Executable())
 	rootCmd.AddCommand(getNetworkWallets.Executable())
 	rootCmd.AddCommand(deleteWallet.Executable())
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		os.Exit(1)
 	}
 }
