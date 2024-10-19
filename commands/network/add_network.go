@@ -38,12 +38,14 @@ func (a *AddNetwork) Execute(rpc *string, networkId *int, networkName *string) {
 
 	_, err := a.Locator.NetworkService.Get(networkName)
 	if err == nil {
-		log.Fatal("Newtork already exists with the same name!")
+		fmt.Println(err)
+		log.Fatal("Newtork already exists with the same name!", err)
 	}
 
 	err = a.Locator.NetworkService.Add(rpc, networkId, networkName)
 
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal("Failed to save network to the database, please check the stack!")
 	}
 }

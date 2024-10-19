@@ -11,6 +11,34 @@ type NetworkService struct {
 	Storage interfaces.Storage
 }
 
+func (n *NetworkService) All() ([]models.Network, error) {
+	n.Storage.Open()
+	defer n.Storage.Close()
+	sql := `
+		SELECT * FROM networks
+	`
+
+	rows, err := n.Storage.Query(&sql, &[]interface{}{})
+
+	if err != nil {
+		return []models.Network{}, err
+	}
+
+	var networks []models.Network
+	for rows.Next() {
+		var network models.Network
+
+		err := rows.Scan(&network.Name, &network.Rpc, &network.NetworkId)
+		if err != nil {
+			return []models.Network{}, err
+		}
+
+		networks = append(networks, network)
+	}
+
+	return networks, nil
+}
+
 func (n *NetworkService) Add(rpc *string, port *int, name *string) error {
 	n.Storage.Open()
 	defer n.Storage.Close()
@@ -51,7 +79,7 @@ func (n *NetworkService) Get(name *string) (models.Network, error) {
 	})
 
 	var network models.Network
-	err := row.Scan(&network.Rpc, &network.NetworkId, &network.Name)
+	err := row.Scan(&network.Name, &network.Rpc, &network.NetworkId)
 	if err != nil {
 		fmt.Println("Failed to retrive network from database with name ", *name)
 		return models.Network{}, err
