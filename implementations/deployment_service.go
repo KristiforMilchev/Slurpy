@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -126,6 +126,7 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 	addresses := make(map[string]interface{})
 
 	for contractName, config := range schema.Contracts {
+		fmt.Println("Deploying deployment ", contractName)
 		abiData, err := json.Marshal(config.Abi)
 		if err != nil {
 			log.Fatalf("Failed to marshal ABI: %v", err)
@@ -139,36 +140,49 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 
 		bytecode := common.FromHex(config.Bytecode)
 
-		// Prepare constructor parameters by replacing named dependencies
-		params := make([]interface{}, len(config.Dependencies))
-		for i, dep := range config.Dependencies {
-			switch dep := dep.(type) {
-			case string:
-				// Handle named contract dependencies (e.g., "$contract1")
-				if strings.HasPrefix(dep, "$") {
-					contractDep := dep[1:] // Remove the '$' prefix to get the contract name
-					address, exists := addresses[contractDep]
-					if !exists {
-						log.Fatalf("Failed to find dependency %s for contract %s", contractDep, contractName)
-						return fmt.Errorf("dependency %s not found", contractDep)
-					}
-					params[i] = address // Replace with the contract address
-				} else {
-					// Regular string parameters
-					params[i] = dep
+		var params []interface{}
+
+		for _, dep := range config.Dependencies {
+			switch dep.Type {
+			case "deployment":
+				address, exists := addresses[contractName]
+				if !exists {
+					log.Fatalf("Failed to find dependency %s for contract %s", contractName, contractName)
+					return fmt.Errorf("dependency %s not found", contractName)
 				}
-			default:
-				// Handle any other type directly
-				params[i] = dep
+				params = append(params, address)
+			case "address":
+				params = append(params, common.HexToAddress(dep.Value))
+			case "int":
+				val, err := strconv.Atoi(dep.Value)
+				if err != nil {
+					log.Fatal("Failed to parse value, type missmatch expected int got ", dep.Value)
+				}
+				params = append(params, val)
+			case "float64":
+				i, err := strconv.ParseInt(dep.Value, 10, 64)
+				if err != nil {
+					log.Fatal("Failed to parse value, type missmatch expected int got ", dep.Value)
+				}
+				params = append(params, i)
+			case "bigInt":
+				i, err := strconv.ParseInt(dep.Value, 10, 64)
+				if err != nil {
+					log.Fatal("Failed to parse value, type missmatch expected int got ", dep.Value)
+				}
+				val := big.NewInt(i)
+				params = append(params, val)
+
 			}
+
 		}
 
 		// Deploy the contract
-		address, err := d.deploy(key, auth, &contractAbi, &bytecode, client, &params)
+		address, err := d.deploy(key, auth, contractAbi, &bytecode, client, &params)
 		if err != nil {
+			fmt.Println("Failed deployment")
 			return err
 		}
-
 		// Store the deployed contract address
 		addresses[contractName] = common.HexToAddress(address.Hex())
 	}
@@ -176,15 +190,12 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 	return nil
 }
 
-func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi *abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, error) {
-	convertedParams := make([]interface{}, len(*params))
-	for i, param := range *params {
-		convertedParams[i] = resolveParameterType(param)
-	}
+func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, error) {
 
-	address, tx, _, err := bind.DeployContract(auth, *abi, *bytecode, client, convertedParams...)
+	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
-		log.Fatalf("Failed to deploy contract: %v", err)
+		fmt.Println(*params...)
+		fmt.Println(err)
 		return common.Address{}, err
 	}
 
@@ -211,39 +222,20 @@ func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi *ab
 		return common.Address{}, err
 	}
 
-	insertParamsSQL := `
-		INSERT INTO deployment_parameters (parameter, deploymentId)
-		VALUES ($1, $2)
-	`
-	for _, param := range *params {
-		err := d.Storage.Exec(&insertParamsSQL, &[]interface{}{
-			&param,
-			&id,
-		})
-		if err != nil {
-			log.Fatalf("Failed to insert deployment parameters: %v", err)
-			return common.Address{}, err
-		}
-	}
+	// insertParamsSQL := `
+	// 	INSERT INTO deployment_parameters (parameter, deploymentId)
+	// 	VALUES ($1, $2)
+	// `
+	// for _, param := range *params {
+	// 	err := d.Storage.Exec(&insertParamsSQL, &[]interface{}{
+	// 		&param,
+	// 		&id,
+	// 	})
+	// 	if err != nil {
+	// 		log.Fatalf("Failed to insert deployment parameters: %v", err)
+	// 		return common.Address{}, err
+	// 	}
+	// }
 
 	return address, nil
-}
-
-func resolveParameterType(param interface{}) interface{} {
-	switch v := param.(type) {
-	case float64:
-		return big.NewInt(int64(v))
-	case int:
-		return big.NewInt(int64(v))
-	case string:
-		return v
-	case bool:
-		return v
-	case common.Address:
-		return v
-	case *big.Int:
-		return v
-	default:
-		return v
-	}
 }
