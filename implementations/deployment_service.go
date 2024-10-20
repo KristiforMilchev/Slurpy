@@ -63,9 +63,8 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 	defer d.Storage.Close()
 
 	sql := `
-		SELECT d.id, d.contract, d.created_at, d.group_name, dp.parameter
+		SELECT d.id, d.contract, d.created_at, d.group_name
 		FROM deployments AS d
-		LEFT JOIN deployment_parameters AS dp ON dp.deploymentId = d.id
 		WHERE d.group_name = $1
 	`
 	rows, err := d.Storage.Query(&sql, &[]interface{}{
@@ -89,22 +88,16 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 			return nil, err
 		}
 
-		deployment, exists := deploymentMap[id]
-		if !exists {
-			date, _ := time.Parse("2006-01-02 15:04:05", createdAt)
-			deployment = &models.Deployment{
-				Id:       id,
-				Contract: contract,
-				Date:     date,
-				Options:  []string{},
-			}
-			deploymentMap[id] = deployment
-			data = append(data, *deployment)
+		date, _ := time.Parse("2006-01-02 15:04:05", createdAt)
+		deployment := &models.Deployment{
+			Id:       id,
+			Contract: contract,
+			Date:     date,
+			Options:  []string{},
 		}
+		deploymentMap[id] = deployment
+		data = append(data, *deployment)
 
-		if parameter != "" {
-			deployment.Options = append(deployment.Options, parameter)
-		}
 	}
 
 	return data, nil
