@@ -61,8 +61,6 @@ func main() {
 		Locator: locator,
 	}
 
-	getAllDeployments.Execute()
-
 	rootCmd.AddCommand(getAllDeployments.Executable())
 	rootCmd.AddCommand(getDeploymentCommand.Executable())
 	rootCmd.AddCommand(deployCommand.Executable())
