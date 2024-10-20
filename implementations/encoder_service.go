@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -36,7 +35,6 @@ func (e *EncoderService) ParseByteCode(bytecodeHex *string) ([]byte, error) {
 	cleanedHex := strings.TrimPrefix(*bytecodeHex, "0x")
 	bytecode, err := hex.DecodeString(string(cleanedHex))
 	if err != nil {
-		fmt.Printf("Failed to decode bytecode: %v", err)
 		return nil, err
 	}
 
