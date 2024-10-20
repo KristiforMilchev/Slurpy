@@ -1,4 +1,6 @@
-{
-    "DbPath": "./data/",
-    "DbName": "slurpy.db"
-}
+
+	{
+		"DbPath": "./data/",
+		"DbName": "slurpy.db"
+	}
+	

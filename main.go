@@ -16,7 +16,7 @@ var locator implementations.Locator
 var configuration interfaces.Configuration
 
 func main() {
-	localSettingsFile := "settings.json"
+	localSettingsFile := "./settings.json"
 	settingsFile := FileFromExecutable(&localSettingsFile)
 	configuration = &implementations.Configuration{
 		File: settingsFile,

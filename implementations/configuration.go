@@ -16,7 +16,7 @@ func (c *Configuration) Exists() bool {
 }
 
 func (c *Configuration) Create() bool {
-	file, err := os.Create("settings.json")
+	file, err := os.Create("./settings.json")
 	if err != nil {
 		panic("Failed to create default configuration file")
 	}
