@@ -1,8 +1,6 @@
 package implementations
 
 import (
-	"fmt"
-
 	"slurpy/interfaces"
 	"slurpy/models"
 )
@@ -90,15 +88,7 @@ func (n *NetworkService) Remove(name *string) error {
 		WHERE network_name = $1
 	`
 
-	row := n.Storage.QuerySingle(&sql, &[]interface{}{
+	return n.Storage.Exec(&sql, &[]interface{}{
 		&name,
 	})
-
-	err := row.Scan()
-	if err != nil {
-		fmt.Println("Failed to delete network with name", name)
-		return err
-	}
-
-	return nil
 }
