@@ -17,7 +17,7 @@ type AllDeploymentsCommand struct {
 func (c *AllDeploymentsCommand) Executable() *cobra.Command {
 
 	return &cobra.Command{
-		Use:   "all",
+		Use:   "deployments",
 		Short: "List all deployments",
 		Run: func(cmd *cobra.Command, args []string) {
 			c.Execute()
