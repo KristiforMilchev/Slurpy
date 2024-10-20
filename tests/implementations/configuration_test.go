@@ -1,4 +1,4 @@
-package services_test
+package implementations_test
 
 import (
 	"os"
@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestF_Load_Should_Return_True(t *testing.T) {
-	filePath := "../data/settings.json"
+	filePath := "../test_data/settings.json"
 	config = &implementations.Configuration{
 		File: &filePath,
 	}
@@ -32,7 +32,7 @@ func TestF_Load_Should_Return_True(t *testing.T) {
 }
 
 func TestF_Load_Should_Panic_On_Malformed_Configurtaion_File(t *testing.T) {
-	filePath := "../data/malformed_setting.json"
+	filePath := "../test_data/malformed_setting.json"
 	config = &implementations.Configuration{
 		File: &filePath,
 	}
@@ -62,7 +62,7 @@ func TestF_Load_Should_Panic_On_Missing_Configuration_File(t *testing.T) {
 }
 
 func TestF_Should_Return_Existing_Key(t *testing.T) {
-	filePath := "../data/settings.json"
+	filePath := "../test_data/settings.json"
 	config = &implementations.Configuration{
 		File: &filePath,
 	}
@@ -77,7 +77,7 @@ func TestF_Should_Return_Existing_Key(t *testing.T) {
 }
 
 func TestF_Should_Return_Nil_For_Missing_Key(t *testing.T) {
-	filePath := "../data/settings.json"
+	filePath := "../test_data/settings.json"
 	config = &implementations.Configuration{
 		File: &filePath,
 	}

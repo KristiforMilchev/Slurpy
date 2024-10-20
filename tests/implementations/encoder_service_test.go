@@ -1,4 +1,4 @@
-package services_test
+package implementations_test
 
 import (
 	"os"
@@ -13,7 +13,7 @@ var encoder interfaces.EncoderService
 func Test_Should_Parse_Valid_ABI(t *testing.T) {
 	encoder = &implementations.EncoderService{}
 
-	file, err := os.ReadFile("../data/example_abi.json")
+	file, err := os.ReadFile("../test_data/example_abi.json")
 
 	if err != nil {
 		t.Log("Local example json doesn't exist, please check test data in setup!")

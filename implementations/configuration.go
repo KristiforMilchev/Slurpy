@@ -2,7 +2,6 @@ package implementations
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -21,14 +20,11 @@ func (config *Configuration) Load() bool {
 
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&config.values); err != nil {
-		fmt.Println("Error decoding JSON:", err)
 		panic("Malformed Configuration file!")
 	}
 
 	defer file.Close()
 
-	// Print the map
-	fmt.Println(config.values)
 	return true
 }
 
