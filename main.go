@@ -21,6 +21,11 @@ func main() {
 	configuration = &implementations.Configuration{
 		File: settingsFile,
 	}
+
+	if exists := configuration.Exists(); !exists {
+		configuration.Create()
+	}
+
 	configuration.Load()
 
 	storage := SetupDatabase(configuration)
