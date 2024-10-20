@@ -2,6 +2,7 @@ package implementations
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -61,7 +62,17 @@ func (s *Storage) QuerySingle(sql *string, parameters *[]interface{}) *sql.Row {
 }
 
 func (s *Storage) Exec(sql *string, parameters *[]interface{}) error {
-	_, err := s.db.Exec(*sql, *parameters...)
+	result, err := s.db.Exec(*sql, *parameters...)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+
+	if affected == 0 {
+		return errors.New("no rows affected")
+	}
+
 	return err
 }
 
