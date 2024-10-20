@@ -54,6 +54,9 @@ func main() {
 	getNetworkWallets := wallet.GetAllWalletsCommand{
 		Locator: locator,
 	}
+	removeNetworkCommand := network.RemoveNetwork{
+		Locator: locator,
+	}
 	deleteWallet := wallet.DeleteWalletCommand{
 		Locator: locator,
 	}
@@ -65,6 +68,7 @@ func main() {
 	rootCmd.AddCommand(getNetworksCommand.Executable())
 	rootCmd.AddCommand(addNetworkCommand.Executable())
 	rootCmd.AddCommand(getNetworkWallets.Executable())
+	rootCmd.AddCommand(removeNetworkCommand.Executable())
 	rootCmd.AddCommand(deleteWallet.Executable())
 
 	if err := rootCmd.Execute(); err != nil {
