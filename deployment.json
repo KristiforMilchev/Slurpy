@@ -52,9 +52,18 @@
                 }
             ],
             "dependencies": [
-                "test",
-                "symbol",
-                18
+                {
+                    "type": "string",
+                    "value": "123"
+                },
+                {
+                    "type": "string",
+                    "value": "123"
+                },
+                {
+                    "type": "bigInt",
+                    "value": "18"
+                }
             ]
         },
         "contract2": {
@@ -73,7 +82,10 @@
                 }
             ],
             "dependencies": [
-                "$contract1"
+                {
+                    "type": "deployment",
+                    "value": "contract1"
+                }
             ]
         }
     }
