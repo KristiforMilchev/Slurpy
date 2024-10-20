@@ -27,9 +27,8 @@ func (d *DeploymentService) GetDeployments() ([]models.Deployment, error) {
 	defer d.Storage.Close()
 
 	sql := `
-		SELECT d.id, d.contract, d.created_at, d.group_name, dp.parameter
+		SELECT d.id, d.contract, d.created_at, d.group_name
 		FROM deployments AS d
-		LEFT JOIN deployment_parameters AS dp ON dp.deploymentId = d.id
 	`
 	rows, err := d.Storage.Query(&sql, &[]interface{}{})
 	if err != nil {
@@ -38,33 +37,22 @@ func (d *DeploymentService) GetDeployments() ([]models.Deployment, error) {
 	}
 	defer rows.Close()
 
-	deploymentMap := make(map[int]*models.Deployment)
 	var data []models.Deployment
 
 	for rows.Next() {
 		var id int
-		var contract, createdAt, group, parameter string
-		err := rows.Scan(&id, &contract, &createdAt, &group, &parameter)
+		var contract, createdAt, group string
+		err := rows.Scan(&id, &contract, &createdAt, &group)
 		if err != nil {
 			return nil, err
 		}
+		date, _ := time.Parse("2006-01-02 15:04:05", createdAt)
 
-		deployment, exists := deploymentMap[id]
-		if !exists {
-			date, _ := time.Parse("2006-01-02 15:04:05", createdAt)
-			deployment = &models.Deployment{
-				Id:       id,
-				Contract: contract,
-				Date:     date,
-				Options:  []string{},
-			}
-			deploymentMap[id] = deployment
-			data = append(data, *deployment)
-		}
-
-		if parameter != "" {
-			deployment.Options = append(deployment.Options, parameter)
-		}
+		data = append(data, models.Deployment{
+			Id:       id,
+			Contract: contract,
+			Date:     date,
+		})
 	}
 
 	return data, nil
@@ -145,7 +133,7 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 		for _, dep := range config.Dependencies {
 			switch dep.Type {
 			case "deployment":
-				address, exists := addresses[contractName]
+				address, exists := addresses[dep.Value]
 				if !exists {
 					log.Fatalf("Failed to find dependency %s for contract %s", contractName, contractName)
 					return fmt.Errorf("dependency %s not found", contractName)
@@ -177,13 +165,11 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 
 		}
 
-		// Deploy the contract
 		address, err := d.deploy(key, auth, contractAbi, &bytecode, client, &params)
 		if err != nil {
 			fmt.Println("Failed deployment")
 			return err
 		}
-		// Store the deployed contract address
 		addresses[contractName] = common.HexToAddress(address.Hex())
 	}
 
