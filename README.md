@@ -1,6 +1,6 @@
 # slurpy
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
+![Version](https://img.shields.io/badge/version-0.1.5.2-brightgreen.svg)
 
 Early build 0.1.5 is available, it has limited functionality however it covers the core use case available in the description bellow, do not use for the mainnet and only store disposable wallets that don't have any real currency in them!
 
