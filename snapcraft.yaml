@@ -1,6 +1,6 @@
 name: slurpy  # Name of your snap package
 base: core20         # Base snap (core20 is for Ubuntu 20.04)
-version: '1.0.0'     # Version of your app
+version: '0.1.5.2'     # Version of your app
 summary: A simple Go application for deploying related smart contracts  # Short description
 description: |
  This tool was created because i wanted a quick and easy way to replicate EVM networks eviroments, maintaining source control of the many different swaps, tokens and factories in a certain network for development is not just hard to maintain but also impractical. In order to help setting up local development or a development server it's much easier to create migration scripts that can replicate the network and to it's disared state simply using the abis and bytecode of the existing infrastructure, this tool allows simply that, an easy to setup and get up and running local enviroment that is a carbon copy of certain parts of an existing blockchain network as long as you have access to the bytecode and abis of the existing smart contracts.
