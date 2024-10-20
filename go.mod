@@ -26,7 +26,9 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
-	github.com/ovechkin-dm/mockio v1.0.0 // indirect
+	github.com/ovechkin-dm/go-dyno v0.3.2 // indirect
+	github.com/ovechkin-dm/mockio v1.0.1 // indirect
+	github.com/petermattis/goid v0.0.0-20240813172612-4fcff4a6cae7 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/spf13/cobra v1.8.1 // indirect
