@@ -259,6 +259,9 @@ func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi
 }
 
 func (d *DeploymentService) SaveParameters(params *[]interface{}, id int) error {
+	d.Storage.Open()
+	defer d.Storage.Close()
+
 	insertParamsSQL := `
 		INSERT INTO deployment_parameters (parameter, deploymentId)
 		VALUES ($1, $2)
