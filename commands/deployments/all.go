@@ -2,7 +2,6 @@ package deployments
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -31,18 +30,30 @@ func (c *AllDeploymentsCommand) Execute() {
 		fmt.Println("Failed to get deployments, received an error!")
 	}
 
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"ID", "Contract", "Date"})
+	printer := implementations.TablePrinter{}
 
 	for _, deployment := range deployments {
-		t.AppendRow(table.Row{deployment.Id, deployment.Contract, deployment.Date})
-		fmt.Println()
-		fmt.Println(deployment.Date)
+		dep := table.Row{deployment.Id, deployment.Contract, deployment.Date, deployment.Group}
+		printer.Print([]table.Row{dep}, table.Row{
+			"ID",
+			"CONTRACT",
+			"GROUP",
+			"DATE",
+		})
 
+		var parameters []table.Row
+		for _, parameter := range deployment.Options {
+			param := table.Row{
+				parameter,
+			}
+
+			parameters = append(parameters, param)
+		}
+
+		if len(parameters) > 0 {
+			printer.Print(parameters, table.Row{"Value"})
+		}
 	}
-
-	t.Render()
 
 	if len(deployments) == 0 {
 		fmt.Println("No deployments found")

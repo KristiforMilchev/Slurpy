@@ -48,11 +48,39 @@ func (d *DeploymentService) GetDeployments() ([]models.Deployment, error) {
 		}
 		date, _ := time.Parse("2006-01-02 15:04:05", createdAt)
 
-		data = append(data, models.Deployment{
+		deployment := &models.Deployment{
 			Id:       id,
 			Contract: contract,
 			Date:     date,
+			Group:    group,
+			Options:  []string{},
+		}
+
+		sqlParameters := `
+			SELECT parameter FROM deployment_parameters
+			WHERE deploymentId = $1
+		`
+
+		rows, err := d.Storage.Query(&sqlParameters, &[]interface{}{
+			&id,
 		})
+
+		if err != nil {
+			continue
+		}
+		var parameters []string
+		for rows.Next() {
+			var param string
+			err := rows.Scan(&param)
+
+			if err != nil {
+				fmt.Println("Can't retrive parameter for deloyment with contract ", contract)
+			}
+
+			parameters = append(parameters, param)
+		}
+		deployment.Options = parameters
+		data = append(data, *deployment)
 	}
 
 	return data, nil
@@ -77,13 +105,11 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 	}
 	defer rows.Close()
 
-	deploymentMap := make(map[int]*models.Deployment)
 	var data []models.Deployment
-
 	for rows.Next() {
 		var id int
-		var contract, createdAt, group, parameter string
-		err := rows.Scan(&id, &contract, &createdAt, &group, &parameter)
+		var contract, createdAt, group string
+		err := rows.Scan(&id, &contract, &createdAt, &group)
 		if err != nil {
 			return nil, err
 		}
@@ -93,63 +119,86 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 			Id:       id,
 			Contract: contract,
 			Date:     date,
+			Group:    group,
 			Options:  []string{},
 		}
-		deploymentMap[id] = deployment
-		data = append(data, *deployment)
 
+		sqlParameters := `
+			SELECT parameter FROM deployment_parameters
+			WHERE deploymentId = $1
+		`
+
+		rows, err := d.Storage.Query(&sqlParameters, &[]interface{}{
+			&id,
+		})
+
+		if err != nil {
+			continue
+		}
+		var parameters []string
+		for rows.Next() {
+			var param string
+			err := rows.Scan(&param)
+
+			if err != nil {
+				fmt.Println("Can't retrive parameter for deloyment with contract ", contract)
+			}
+
+			parameters = append(parameters, param)
+		}
+		deployment.Options = parameters
+		data = append(data, *deployment)
 	}
 
 	return data, nil
 }
 func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, auth *bind.TransactOpts, client *ethclient.Client) error {
-	// Store contract addresses by name; interface{} allows different types
 	addresses := make(map[string]interface{})
 
 	for contractName, config := range schema.Contracts {
-		fmt.Println("Deploying deployment ", contractName)
 		abiData, err := json.Marshal(config.Abi)
 		if err != nil {
-			log.Fatalf("Failed to marshal ABI: %v", err)
+			return err
 		}
 
 		contractAbi, err := abi.JSON(bytes.NewReader(abiData))
 		if err != nil {
-			log.Fatalf("Failed to parse ABI for contract %s: %v", contractName, err)
 			return err
 		}
 
 		bytecode := common.FromHex(config.Bytecode)
-
+		var beforeConverting []interface{}
 		var params []interface{}
 
 		for _, dep := range config.Dependencies {
+			beforeConverting = append(beforeConverting, dep.Value)
 			switch dep.Type {
 			case "deployment":
 				address, exists := addresses[dep.Value]
 				if !exists {
-					log.Fatalf("Failed to find dependency %s for contract %s", contractName, contractName)
 					return fmt.Errorf("dependency %s not found", contractName)
 				}
 				params = append(params, address)
 			case "address":
 				params = append(params, common.HexToAddress(dep.Value))
+			case "string":
+				params = append(params, dep.Value)
 			case "int":
 				val, err := strconv.Atoi(dep.Value)
 				if err != nil {
-					log.Fatal("Failed to parse value, type missmatch expected int got ", dep.Value)
+					return err
 				}
 				params = append(params, val)
 			case "float64":
 				i, err := strconv.ParseInt(dep.Value, 10, 64)
 				if err != nil {
-					log.Fatal("Failed to parse value, type missmatch expected int got ", dep.Value)
+					return err
 				}
 				params = append(params, i)
 			case "bigInt":
 				i, err := strconv.ParseInt(dep.Value, 10, 64)
 				if err != nil {
-					log.Fatal("Failed to parse value, type missmatch expected int got ", dep.Value)
+					return err
 				}
 				val := big.NewInt(i)
 				params = append(params, val)
@@ -158,24 +207,29 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 
 		}
 
-		address, err := d.deploy(key, auth, contractAbi, &bytecode, client, &params)
+		address, id, err := d.deploy(key, auth, contractAbi, &bytecode, client, &params)
 		if err != nil {
-			fmt.Println("Failed deployment")
 			return err
 		}
+
+		err = d.SaveParameters(&beforeConverting, id)
+		if err != nil {
+			return err
+		}
+
 		addresses[contractName] = common.HexToAddress(address.Hex())
 	}
 
 	return nil
 }
 
-func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, error) {
+func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, int, error) {
 
 	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
 		fmt.Println(*params...)
 		fmt.Println(err)
-		return common.Address{}, err
+		return common.Address{}, 0, err
 	}
 
 	fmt.Printf("Contract deployed at address: %s\n", address.Hex())
@@ -198,23 +252,37 @@ func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi
 	err = row.Scan(&id)
 	if err != nil {
 		log.Fatalf("Failed to save deployment details: %v", err)
-		return common.Address{}, err
+		return common.Address{}, 0, err
 	}
 
-	// insertParamsSQL := `
-	// 	INSERT INTO deployment_parameters (parameter, deploymentId)
-	// 	VALUES ($1, $2)
-	// `
-	// for _, param := range *params {
-	// 	err := d.Storage.Exec(&insertParamsSQL, &[]interface{}{
-	// 		&param,
-	// 		&id,
-	// 	})
-	// 	if err != nil {
-	// 		log.Fatalf("Failed to insert deployment parameters: %v", err)
-	// 		return common.Address{}, err
-	// 	}
-	// }
+	return address, id, nil
+}
 
-	return address, nil
+func (d *DeploymentService) SaveParameters(params *[]interface{}, id int) error {
+	d.Storage.Open()
+	defer d.Storage.Close()
+
+	insertParamsSQL := `
+		INSERT INTO deployment_parameters (parameter, deploymentId)
+		VALUES ($1, $2)
+	`
+
+	for _, param := range *params {
+		fmt.Println("saving ", param)
+		str, ok := param.(string)
+		if !ok {
+			fmt.Print("Failed to convert parameter")
+			continue
+		}
+
+		err := d.Storage.Exec(&insertParamsSQL, &[]interface{}{
+			str,
+			&id,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

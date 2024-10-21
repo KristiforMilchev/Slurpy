@@ -29,16 +29,16 @@ func (m *MockNetwokService) Init() interfaces.NetworkService {
 	netwokId := 2222
 	name := "local"
 	mock.When(service.Add(&networkRpc, &netwokId, &name)).ThenReturn(nil)
+	nameExisting := "random_123_network"
+	mock.When(service.Add(&networkRpc, &netwokId, &nameExisting)).ThenReturn(errors.New("network already exists"))
 
-	mock.When(service.Get(&name)).ThenReturn(func(args []any) (models.Network, error) {
-		var err error
-		network := models.Network{
-			Rpc:       "HTTPS://127.0.0.1:2245",
-			NetworkId: 2222,
-			Name:      "Local",
-		}
-		return network, err
-	})
+	mock.When(service.Get(&name)).ThenReturn(models.Network{
+		Rpc:       "HTTPS://127.0.0.1:2245",
+		NetworkId: 2222,
+		Name:      "Local",
+	}, nil)
+	nameNonExisting := "random_333_network"
+	mock.When(service.Get(&nameNonExisting)).ThenReturn(models.Network{}, errors.New("network exists"))
 
 	nonExistingNetowrk := "asd"
 	mock.When(service.Get(&nonExistingNetowrk)).ThenReturn(func(args []any) (models.Network, error) {

@@ -42,12 +42,12 @@ func (a *AddNetwork) Execute(rpc *string, networkId *int, networkName *string) {
 
 	_, err := a.Locator.NetworkService.Get(networkName)
 	if err == nil {
-		log.Fatal("Network already exists with the same name!")
+		log.Panic("Network already exists with the same name!")
 	}
 
 	err = a.Locator.NetworkService.Add(rpc, networkId, networkName)
 
 	if err != nil {
-		log.Fatal("Failed to save network to the database!")
+		log.Panic("Failed to save network to the database!")
 	}
 }

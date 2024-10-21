@@ -9,5 +9,5 @@ type Storage interface {
 	QuerySingle(sql *string, parameters *[]interface{}) *sql.Row
 	Exec(sql *string, parameters *[]interface{}) error
 	Open() bool
-	Close()
+	Close() bool
 }
