@@ -76,8 +76,9 @@ func (s *Storage) Exec(sql *string, parameters *[]interface{}) error {
 	return err
 }
 
-func (s *Storage) Close() {
+func (s *Storage) Close() bool {
 	if s.db != nil {
 		s.db.Close()
 	}
+	return true
 }
