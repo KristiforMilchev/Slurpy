@@ -195,14 +195,24 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 					return err
 				}
 				params = append(params, i)
-			case "bigInt":
-				i, err := strconv.ParseInt(dep.Value, 10, 64)
+			case "uint8":
+				val, err := strconv.ParseUint(dep.Value, 10, 8)
 				if err != nil {
 					return err
 				}
-				val := big.NewInt(i)
-				params = append(params, val)
-
+				params = append(params, uint8(val))
+			case "uint32":
+				val, err := strconv.ParseUint(dep.Value, 10, 32)
+				if err != nil {
+					return err
+				}
+				params = append(params, uint32(val))
+			case "bigInt":
+				i, ok := new(big.Int).SetString(dep.Value, 10)
+				if !ok {
+					return fmt.Errorf("invalid bigInt value: %s", dep.Value)
+				}
+				params = append(params, i)
 			}
 
 		}
@@ -224,7 +234,6 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 }
 
 func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, int, error) {
-
 	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
 		fmt.Println(*params...)
