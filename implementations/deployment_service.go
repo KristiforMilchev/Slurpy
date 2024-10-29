@@ -27,7 +27,7 @@ func (d *DeploymentService) GetDeployments() ([]models.Deployment, error) {
 	defer d.Storage.Close()
 
 	sql := `
-		SELECT d.id, d.contract, d.created_at, d.group_name
+		SELECT d.id, d.name, d.contract, d.created_at, d.group_name
 		FROM deployments AS d
 	`
 	rows, err := d.Storage.Query(&sql, &[]interface{}{})
@@ -41,8 +41,8 @@ func (d *DeploymentService) GetDeployments() ([]models.Deployment, error) {
 
 	for rows.Next() {
 		var id int
-		var contract, createdAt, group string
-		err := rows.Scan(&id, &contract, &createdAt, &group)
+		var name, contract, createdAt, group string
+		err := rows.Scan(&id, &name, &contract, &createdAt, &group)
 		if err != nil {
 			return nil, err
 		}
@@ -50,6 +50,7 @@ func (d *DeploymentService) GetDeployments() ([]models.Deployment, error) {
 
 		deployment := &models.Deployment{
 			Id:       id,
+			Name:     name,
 			Contract: contract,
 			Date:     date,
 			Group:    group,
@@ -91,7 +92,7 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 	defer d.Storage.Close()
 
 	sql := `
-		SELECT d.id, d.contract, d.created_at, d.group_name
+		SELECT d.id, d.name, d.contract, d.created_at, d.group_name
 		FROM deployments AS d
 		WHERE d.group_name = $1
 	`
@@ -108,8 +109,8 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 	var data []models.Deployment
 	for rows.Next() {
 		var id int
-		var contract, createdAt, group string
-		err := rows.Scan(&id, &contract, &createdAt, &group)
+		var name, contract, createdAt, group string
+		err := rows.Scan(&id, &name, &contract, &createdAt, &group)
 		if err != nil {
 			return nil, err
 		}
@@ -117,6 +118,7 @@ func (d *DeploymentService) GetDeploymentByKey(key string) ([]models.Deployment,
 		date, _ := time.Parse("2006-01-02 15:04:05", createdAt)
 		deployment := &models.Deployment{
 			Id:       id,
+			Name:     name,
 			Contract: contract,
 			Date:     date,
 			Group:    group,
@@ -217,7 +219,7 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 
 		}
 
-		address, id, err := d.deploy(key, auth, contractAbi, &bytecode, client, &params)
+		address, id, err := d.deploy(&config.Name, key, auth, contractAbi, &bytecode, client, &params)
 		if err != nil {
 			return err
 		}
@@ -233,7 +235,7 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 	return nil
 }
 
-func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, int, error) {
+func (d *DeploymentService) deploy(name *string, key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, int, error) {
 	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
 		fmt.Println(*params...)
@@ -248,12 +250,13 @@ func (d *DeploymentService) deploy(key *string, auth *bind.TransactOpts, abi abi
 	defer d.Storage.Close()
 
 	insertDeploymentSQL := `
-		INSERT INTO deployments (contract, created_at, group_name)
-		VALUES ($1, datetime('now', 'localtime'), $2)
+		INSERT INTO deployments (contract, name, created_at, group_name)
+		VALUES ($1, $2, datetime('now', 'localtime'), $3)
 		RETURNING id
 	`
 	row := d.Storage.QuerySingle(&insertDeploymentSQL, &[]interface{}{
 		address.Hex(),
+		&name,
 		&key,
 	})
 
