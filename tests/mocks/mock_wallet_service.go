@@ -12,22 +12,18 @@ import (
 	"strings"
 
 	"github.com/consensys/gnark-crypto/ecc/bls24-317/twistededwards/eddsa"
-	"github.com/joho/godotenv"
 	"github.com/ovechkin-dm/mockio/mock"
 
 	"slurpy/interfaces"
 	"slurpy/models"
+	"slurpy/tests"
 )
 
 type MockWalletService struct {
 }
 
 func (m *MockWalletService) Init() interfaces.WalletService {
-
-	err := godotenv.Load("../../../.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
+	tests.LoadEnv()
 
 	privateKeys := strings.Split(os.Getenv("PRIVATE_KEY"), ",")
 	if len(privateKeys) == 0 {

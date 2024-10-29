@@ -1,14 +1,13 @@
 package mocks
 
 import (
-	"log"
 	"os"
 
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/joho/godotenv"
 	"github.com/ovechkin-dm/mockio/mock"
 
 	"slurpy/interfaces"
+	"slurpy/tests"
 )
 
 type MockRpcService struct {
@@ -16,11 +15,7 @@ type MockRpcService struct {
 
 func (m *MockRpcService) Init() interfaces.RpcService {
 	service := mock.Mock[interfaces.RpcService]()
-	err := godotenv.Load("../../../.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
+	tests.LoadEnv()
 	rpc := os.Getenv("RPC")
 
 	client, _ := ethclient.Dial(rpc)
