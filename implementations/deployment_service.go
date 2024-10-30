@@ -83,6 +83,12 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 					return err
 				}
 				params = append(params, uint32(val))
+			case "int192":
+				val, ok := new(big.Int).SetString(dep.Value, 10)
+				if !ok || val.BitLen() > 192 {
+					return fmt.Errorf("invalid int192 value or out of bounds: %s", dep.Value)
+				}
+				params = append(params, val)
 			case "bigInt":
 				i, ok := new(big.Int).SetString(dep.Value, 10)
 				if !ok {

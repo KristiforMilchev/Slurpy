@@ -39,10 +39,11 @@ func (g *GetDeploymentCommand) Execute(id *string) {
 	printer := implementations.TablePrinter{}
 
 	for _, deployment := range deployments {
-		dep := table.Row{deployment.Id, deployment.Contract, deployment.Date, deployment.Group}
+		dep := table.Row{deployment.Id, deployment.Contract, deployment.Name, deployment.Group, deployment.Date}
 		printer.Print([]table.Row{dep}, table.Row{
 			"ID",
 			"CONTRACT",
+			"NAME",
 			"GROUP",
 			"DATE",
 		})

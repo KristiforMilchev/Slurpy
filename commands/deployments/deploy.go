@@ -71,6 +71,7 @@ func (d *DeployCommand) Execute(path *string, key *string, network *string) {
 	auth.GasLimit = uint64(6000000)
 	err = d.Locator.DeploymentService.DeployContracts(schema, key, auth, rpc)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal("Failed to deploy migration!")
 	}
 
