@@ -58,6 +58,8 @@ func (d *DeployCommand) Execute(path *string, key *string, network *string) {
 	if err != nil {
 		log.Fatal("Failed to retrive netowrk by name")
 	}
+
+	fmt.Println(&networkData.Rpc)
 	d.Locator.RpcService.SetClient(&networkData.Rpc)
 	rpc := d.Locator.RpcService.GetClient()
 	chainid, err := rpc.ChainID(context.Background())
