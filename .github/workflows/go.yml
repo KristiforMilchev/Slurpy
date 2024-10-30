@@ -35,7 +35,7 @@ jobs:
 
     - name: Set Up CI Environment Variables
       run: echo "Setting up CI environment file" &&
-            echo "RPC_URL=https://rpc.blockcert.net" > .env.ci &&
+            echo "RPC=https://rpc.blockcert.net" > .env.ci &&
             echo "PRIVATE_KEY=aed3cc9809bf776292341adb98c5fecf0f1a2fd5655dfbdaa68ba8930de321bd,a69390c77b2fd6734fa670f121a8dd7110740bbce63f126bca7e1e55d76cc435,c1d97cf521d02f4f18748fac4a10eb27847f1dd8ea9bfff68fddc8c7495a964b,2279d49f084f852a93f9795f085dbc6936a1dacd724cc28c990cf736c26860ff" >> .env.ci
 
     - name: Build
