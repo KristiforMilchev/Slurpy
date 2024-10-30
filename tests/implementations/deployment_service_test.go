@@ -2,7 +2,9 @@ package implementations_test
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,10 +17,23 @@ import (
 
 var deployementService interfaces.DeploymentService
 
-func TestF_Should_Initialiaze(t *testing.T) {
-	mock.SetUp(t)
+func setup() {
+	storageMock := mocks.MockStorageService{}
+	storage = storageMock.Init()
+	file, err := os.ReadFile("../test_data/deployment_schema.json")
+	if err != nil {
+		log.Fatalf("Failed to retrive file, %v", err)
+	}
+
+	err = json.Unmarshal(file, &schema)
+	if err != nil {
+		log.Fatal("Failed to parse deployment file, please check for syntax errors!")
+	}
+
+	mockDeploymentRepository := mocks.MockDeploymentRepository{}
+
 	deployementService = &implementations.DeploymentService{
-		Storage: storage,
+		DeploymentRepositoy: mockDeploymentRepository.Init(),
 	}
 	local := "local"
 	walletService := mocks.MockWalletService{}
@@ -38,13 +53,11 @@ func TestF_Should_Initialiaze(t *testing.T) {
 	}
 
 	bindTransOps = *auth
-	if deployementService == nil {
-		t.Log("Should not fail to initialize deployment service")
-		t.Fail()
-	}
+
 }
 func TestF_Should_Deploy_A_Migration_With_Valid_Syntax(t *testing.T) {
 	mock.SetUp(t)
+	setup()
 	deploymentGroup := "valid_migration"
 
 	err := deployementService.DeployContracts(schema, &deploymentGroup, &bindTransOps, &client)
