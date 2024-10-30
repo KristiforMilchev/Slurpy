@@ -2,6 +2,7 @@ package implementations
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -116,6 +117,13 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 }
 
 func (d *DeploymentService) deploy(name *string, key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, int, error) {
+	nonce, err := client.PendingNonceAt(context.Background(), auth.From)
+	if err != nil {
+		log.Fatalf("Failed to get nonce: %v", err)
+		return common.Address{}, 0, err
+	}
+	auth.Nonce = big.NewInt(int64(nonce))
+
 	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
 		fmt.Println(*params...)
