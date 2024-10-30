@@ -123,7 +123,7 @@ func (d *DeploymentService) deploy(name *string, key *string, auth *bind.Transac
 		return common.Address{}, 0, err
 	}
 	auth.Nonce = big.NewInt(int64(nonce))
-
+	fmt.Println(auth.Nonce)
 	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
 		fmt.Println(*params...)
