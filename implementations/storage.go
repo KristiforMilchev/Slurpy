@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"slurpy/interfaces"
 )
 
 type Storage struct {
@@ -48,7 +50,7 @@ func (s *Storage) Open() bool {
 	return err == nil
 }
 
-func (s *Storage) Query(sql *string, parameters *[]interface{}) (*sql.Rows, error) {
+func (s *Storage) Query(sql *string, parameters *[]interface{}) (interfaces.RowsScanner, error) {
 	rows, err := s.db.Query(*sql, *parameters...)
 	if err != nil {
 		return nil, err
@@ -56,8 +58,9 @@ func (s *Storage) Query(sql *string, parameters *[]interface{}) (*sql.Rows, erro
 	return rows, nil
 }
 
-func (s *Storage) QuerySingle(sql *string, parameters *[]interface{}) *sql.Row {
+func (s *Storage) QuerySingle(sql *string, parameters *[]interface{}) interfaces.RowScanner {
 	row := s.db.QueryRow(*sql, *parameters...)
+
 	return row
 }
 

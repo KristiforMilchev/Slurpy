@@ -10,12 +10,15 @@ type MockStorageService struct {
 }
 
 func (m *MockStorageService) Init() interfaces.Storage {
+
 	service := mock.Mock[interfaces.Storage]()
-	anyParams := mock.Any[[]interface{}]()
+	anyParams := mock.Any[*[]interface{}]()
 	anyQuery := mock.Any[string]()
-	mock.When(service.Query(&anyQuery, &anyParams)).ThenReturn(true)
-	mock.When(service.Exec(&anyQuery, &anyParams)).ThenReturn(true)
-	mock.When(service.QuerySingle(&anyQuery, &anyParams)).ThenReturn(true)
+	mockRowsScanner := &MockRowsScanner{}
+	mockRowScanner := &MockRowScanner{}
+	mock.When(service.QuerySingle(&anyQuery, anyParams)).ThenReturn(mockRowScanner, nil)
+	mock.When(service.Query(&anyQuery, anyParams)).ThenReturn(mockRowsScanner)
+	mock.When(service.Exec(&anyQuery, anyParams)).ThenReturn(nil)
 	mock.When(service.Open()).ThenReturn(true)
 	mock.When(service.Close()).ThenReturn(true)
 
