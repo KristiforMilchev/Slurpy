@@ -32,11 +32,11 @@ jobs:
     - name: Download Dependencies
       run: go mod download
 
-
     - name: Set Up CI Environment Variables
-      run: echo "Setting up CI environment file" &&
-            echo "RPC=${{ secrets.RPC }}" > .env.ci &&
-            echo "PRIVATE_KEY=${{ secrets.KEYS }}" >> .env.ci
+      run: |
+        echo "Setting up CI environment file"
+        echo "RPC=${{ secrets.RPC }}" > .env.ci
+        echo "PRIVATE_KEY=${{ secrets.KEYS }}" >> .env.ci
 
     - name: Build
       run: go build
