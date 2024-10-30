@@ -15,13 +15,17 @@ func LoadEnv() {
 		log.Fatal("failed to find root dir")
 	}
 
-	envPath := filepath.Join(root, ".env")
+	envFile := os.Getenv("ENV_PATH")
+	if envFile == "" {
+		envFile = ".env"
+	}
+
+	envPath := filepath.Join(root, envFile)
 	err = godotenv.Load(envPath)
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Fatalf("Error loading %s file: %v", envFile, err)
 	}
 }
-
 func findProjectRoot() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
