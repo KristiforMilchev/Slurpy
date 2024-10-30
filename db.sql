@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS deployments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     contract TEXT NOT NULL,
+    name TEXT NOT NULL,
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
     group_name TEXT
 );

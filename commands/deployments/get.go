@@ -33,7 +33,7 @@ func (g *GetDeploymentCommand) Executable() *cobra.Command {
 func (g *GetDeploymentCommand) Execute(id *string) {
 	deployments, err := g.Locator.DeploymentService.GetDeploymentByKey(*id)
 	if err != nil {
-		log.Fatal("Failed to retrive deployment by id")
+		log.Panic("Failed to retrive deployment by id")
 	}
 
 	printer := implementations.TablePrinter{}

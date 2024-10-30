@@ -1,8 +1,9 @@
 package implementations_test
 
 import (
-	"os"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/mock"
 
 	"slurpy/implementations"
 	"slurpy/interfaces"
@@ -10,14 +11,8 @@ import (
 
 var config interfaces.Configuration
 
-func TestMain(m *testing.M) {
-
-	// Run tests
-	code := m.Run()
-	os.Exit(code)
-}
-
 func TestF_Load_Should_Return_True(t *testing.T) {
+	mock.SetUp(t)
 	filePath := "../test_data/settings.json"
 	config = &implementations.Configuration{
 		File: &filePath,
@@ -32,6 +27,7 @@ func TestF_Load_Should_Return_True(t *testing.T) {
 }
 
 func TestF_Load_Should_Panic_On_Malformed_Configurtaion_File(t *testing.T) {
+	mock.SetUp(t)
 	filePath := "../test_data/malformed_setting.json"
 	config = &implementations.Configuration{
 		File: &filePath,
@@ -47,6 +43,7 @@ func TestF_Load_Should_Panic_On_Malformed_Configurtaion_File(t *testing.T) {
 }
 
 func TestF_Load_Should_Panic_On_Missing_Configuration_File(t *testing.T) {
+	mock.SetUp(t)
 	filePath := "000x000"
 	config = &implementations.Configuration{
 		File: &filePath,
@@ -62,6 +59,7 @@ func TestF_Load_Should_Panic_On_Missing_Configuration_File(t *testing.T) {
 }
 
 func TestF_Should_Return_Existing_Key(t *testing.T) {
+	mock.SetUp(t)
 	filePath := "../test_data/settings.json"
 	config = &implementations.Configuration{
 		File: &filePath,
@@ -77,6 +75,7 @@ func TestF_Should_Return_Existing_Key(t *testing.T) {
 }
 
 func TestF_Should_Return_Nil_For_Missing_Key(t *testing.T) {
+	mock.SetUp(t)
 	filePath := "../test_data/settings.json"
 	config = &implementations.Configuration{
 		File: &filePath,

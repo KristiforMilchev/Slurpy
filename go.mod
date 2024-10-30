@@ -3,6 +3,7 @@ module slurpy
 go 1.22.1
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/bits-and-blooms/bitset v1.14.3 // indirect
@@ -23,6 +24,7 @@ require (
 	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.6.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
