@@ -117,13 +117,16 @@ func (d *DeploymentService) DeployContracts(schema models.Schema, key *string, a
 }
 
 func (d *DeploymentService) deploy(name *string, key *string, auth *bind.TransactOpts, abi abi.ABI, bytecode *[]byte, client *ethclient.Client, params *[]interface{}) (common.Address, int, error) {
-	nonce, err := client.PendingNonceAt(context.Background(), auth.From)
+	blockNumber, _ := client.BlockByNumber(context.Background(), nil)
+	fmt.Printf("Latest Block Number: %v\n", blockNumber.Number().Uint64())
+
+	nonce, err := client.NonceAt(auth.Context, auth.From, big.NewInt(int64(blockNumber.NumberU64())))
 	if err != nil {
 		log.Fatalf("Failed to get nonce: %v", err)
 		return common.Address{}, 0, err
 	}
+
 	auth.Nonce = big.NewInt(int64(nonce))
-	fmt.Println(auth.Nonce)
 	address, tx, _, err := bind.DeployContract(auth, abi, *bytecode, client, *params...)
 	if err != nil {
 		fmt.Println(*params...)

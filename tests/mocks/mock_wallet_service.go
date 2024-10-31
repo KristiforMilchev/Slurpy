@@ -2,16 +2,13 @@ package mocks
 
 import (
 	"crypto/ecdsa"
-	"crypto/elliptic"
-	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
-	"math/big"
 	"os"
 	"strings"
 
 	"github.com/consensys/gnark-crypto/ecc/bls24-317/twistededwards/eddsa"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ovechkin-dm/mockio/mock"
 
 	"slurpy/interfaces"
@@ -55,21 +52,19 @@ func (m *MockWalletService) Init() interfaces.WalletService {
 
 	return service
 }
+
 func (m *MockWalletService) ImportPrivateKeyFromString(hexKey string) (*ecdsa.PrivateKey, error) {
-	privKeyBytes, err := hex.DecodeString(hexKey)
+	privateKey, err := crypto.HexToECDSA(hexKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode hex key: %w", err)
+		log.Fatal(err)
 	}
 
-	if len(privKeyBytes) != 32 {
-		return nil, fmt.Errorf("invalid private key length: expected 32 bytes, got %d", len(privKeyBytes))
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Fatal("error casting public key to ECDSA")
 	}
+	privateKey.PublicKey = *publicKeyECDSA
 
-	privKey := new(ecdsa.PrivateKey)
-	privKey.D = new(big.Int).SetBytes(privKeyBytes)
-	privKey.Curve = elliptic.P256()
-
-	privKey.PublicKey.X, privKey.PublicKey.Y = privKey.PublicKey.Curve.ScalarBaseMult(privKey.D.Bytes())
-
-	return privKey, nil
+	return privateKey, nil
 }
